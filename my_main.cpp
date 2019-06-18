@@ -169,6 +169,12 @@ struct arg_struct{
 
 int rec_state = 0;
 
+int get_free_space_mb(){
+    struct statvfs buf;
+    statvfs("/media/ins/red_ssd", &buf);
+    return buf.f_bsize * buf.f_bavail/1000000;
+}
+
 void* save_disk_task(void* arg){
 
     int record_id = ((arg_struct*)arg)->record_id;
@@ -177,7 +183,6 @@ void* save_disk_task(void* arg){
     int last_ts=0;
     int tdiff;
     int fuck_cnt = 0;
-    struct statvfs buf;
 
     XI_IMG* xim = ((arg_struct*) arg)->pxim;
     std::mutex* pmutx = ((arg_struct*) arg)->pmutx;
@@ -193,9 +198,8 @@ void* save_disk_task(void* arg){
 
         pmutx->lock();
         if (xim->acq_nframe > last_saved){
-
-            statvfs("/media/ins/red_ssd", &buf);
-            if (buf.f_bsize * buf.f_bavail/1000000 < 200){
+            
+            if (get_free_space_mb() < 200){
                 printf("Storage is full.\n");
                 rec_state = 0;
             }else{
