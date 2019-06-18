@@ -169,9 +169,9 @@ struct arg_struct{
 
 int rec_state = 0;
 
-int get_free_space_mb(){
+int get_free_space_mb(char* path){
     struct statvfs buf;
-    statvfs("/media/ins/red_ssd", &buf);
+    statvfs(path, &buf);
     return buf.f_bsize * buf.f_bavail/1000000;
 }
 
@@ -199,7 +199,7 @@ void* save_disk_task(void* arg){
         pmutx->lock();
         if (xim->acq_nframe > last_saved){
             
-            if (get_free_space_mb() < 200){
+            if (get_free_space_mb(folder) < 200){
                 printf("Storage is full.\n");
                 rec_state = 0;
             }else{
