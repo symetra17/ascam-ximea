@@ -92,31 +92,31 @@ while True:
 
     cam.get_image(img)
 
-    #if img.acq_nframe != (currentcnt + 1):
-    #    losscnt += 1
-    #    print "loss cnt:", losscnt
-    #currentcnt = img.acq_nframe
+    if img.acq_nframe != (currentcnt + 1):
+        losscnt += 1
+        print "loss cnt:", losscnt
+    currentcnt = img.acq_nframe
 
-    #npa = img.get_image_data_numpy()
-    #npa2 = cv2.resize(npa, (screen.width, screen.height))
-    #
-    ##show acquired image with time since the beginning of acquisition
-    #text = "%4.2f ms" % (float(usr_expos)/1000)
-    #cv2.putText(
-    #    npa2, text, (10, 50), font, 2, (255, 255, 255), 2)
-    #
-    #text = "f%.1f"%(usr_apert)
-    #cv2.putText(
-    #    npa2, text, (350, 50), font, 2, (255, 255, 255), 2)
-    #
-    #text = '{:d}dB'.format(int(usr_gain))
-    #cv2.putText(
-    #    npa2, text, (500, 50), font, 2, (255, 255, 255), 2)
-    #
-    #cv2.imshow('ximea', npa2)
-    #
-    #key = cv2.waitKeyEx(5)
-    #
+    npa = img.get_image_data_numpy()
+    npa2 = cv2.resize(npa, (screen.width, screen.height))
+    
+    #show acquired image with time since the beginning of acquisition
+    text = "%4.2f ms" % (float(usr_expos)/1000)
+    cv2.putText(
+        npa2, text, (10, 50), font, 2, (255, 255, 255), 2)
+    
+    text = "f%.1f"%(usr_apert)
+    cv2.putText(
+        npa2, text, (350, 50), font, 2, (255, 255, 255), 2)
+    
+    text = '{:d}dB'.format(int(usr_gain))
+    cv2.putText(
+        npa2, text, (500, 50), font, 2, (255, 255, 255), 2)
+    
+    cv2.imshow('ximea', npa2)
+    
+    key = cv2.waitKeyEx(5)
+    
     #if using_gamepad:
     #    r, w, x = select([gamepad], [], [], 0.001)
     #    if r != []:
@@ -129,52 +129,55 @@ while True:
     #            if event.code == 315 and event.value == 0:
     #                key = 10
     #
-    #if key != -1:
-    #    print 'key ', int(key)
-    #
-    #if key == 27:
-    #    break
-    #
-    #if key == 65362:
-    #    usr_expos *= 1.1
-    #    cam.set_exposure(int(usr_expos))
-    #if key == 65364:
-    #    usr_expos /= 1.1
-    #    cam.set_exposure(int(usr_expos))
-    #
-    #if key == 65363:  # right arrow ->
-    #    usr_apert = usr_apert * 1.1
-    #    cam.set_lens_aperture_value(usr_apert)
-    #    usr_apert = cam.get_lens_aperture_value()
-    #
-    #if key == 65361:  # left arrow <-
-    #    usr_apert = usr_apert / 1.1
-    #    cam.set_lens_aperture_value(usr_apert)
-    #    usr_apert = cam.get_lens_aperture_value()
-    #
-    #if key == 65470:            # F1
-    #    usr_gain = 0.0
-    #    cam.set_gain(usr_gain)
-    #if key == 65471:            # F2
-    #    usr_gain = 6.0
-    #    cam.set_gain(usr_gain)
-    #if key == 65472:            # F3
-    #    usr_gain = 12.0
-    #    cam.set_gain(usr_gain)
-    #
-    #if key == 32:  # space bar
-    #    cv2.imwrite("scr_shot_%04d.tiff"%(scr_shot_cnt), npa)
-    #    scr_shot_cnt += 1
-    #
-    #if key == 10:              # enter key
-    #
+    if key != -1:
+        print 'key ', int(key)
+    
+    if key == 27:
+        break
+    
+    if key == 65362:    # up arrow
+        usr_expos *= 1.1
+        cam.set_exposure(int(usr_expos))
+        save_usr_settings()
+    if key == 65364:   # down arrow
+        usr_expos /= 1.1
+        cam.set_exposure(int(usr_expos))
+        save_usr_settings()
+    if key == 65363:  # right arrow ->
+        usr_apert = usr_apert * 1.1
+        cam.set_lens_aperture_value(usr_apert)
+        usr_apert = cam.get_lens_aperture_value()
+        save_usr_settings()
+    if key == 65361:  # left arrow <-
+        usr_apert = usr_apert / 1.1
+        cam.set_lens_aperture_value(usr_apert)
+        usr_apert = cam.get_lens_aperture_value()
+        save_usr_settings()
+    if key == 65470:            # F1
+        usr_gain = 0.0
+        cam.set_gain(usr_gain)
+        save_usr_settings()
+    if key == 65471:            # F2
+        usr_gain = 6.0
+        cam.set_gain(usr_gain)
+        save_usr_settings()
+    if key == 65472:            # F3
+        usr_gain = 12.0
+        cam.set_gain(usr_gain)
+        save_usr_settings()
+    if key == 32:  # space bar
+        cv2.imwrite("scr_shot_%04d.tiff"%(scr_shot_cnt), npa)
+        scr_shot_cnt += 1
+    
+    if key == 10:              # enter key
+    
     #    cv2.destroyAllWindows()
     #    
     #    cam.stop_acquisition()
     #    cam.close_device()
     #    usr_expos_str = "%d"%(int(usr_expos))
     #    
-    #    save_usr_settings()
+        save_usr_settings()
     #
     #    
     #    call(["./my_xiSample", 

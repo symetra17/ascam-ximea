@@ -169,10 +169,10 @@ struct arg_struct{
 
 int rec_state = 0;
 
-int get_free_space_mb(char* path){
+int get_free_space_mb(std::string path){
     struct statvfs buf;
-    statvfs(path, &buf);
-    return buf.f_bsize * buf.f_bavail/1000000;
+    statvfs(path.c_str(), &buf);
+    return buf.f_bsize * buf.f_bavail/1048576;
 }
 
 void* save_disk_task(void* arg){
@@ -187,7 +187,7 @@ void* save_disk_task(void* arg){
     XI_IMG* xim = ((arg_struct*) arg)->pxim;
     std::mutex* pmutx = ((arg_struct*) arg)->pmutx;
 
-    auto folder = "/media/ins/red_ssd/my_image/";
+    std::string folder = "/media/ins/red_ssd/my_image/";
 
     while(1){
 
@@ -199,11 +199,11 @@ void* save_disk_task(void* arg){
         pmutx->lock();
         if (xim->acq_nframe > last_saved){
             
-            if (get_free_space_mb(folder) < 200){
+            if (get_free_space_mb(folder) < 100){
                 printf("Storage is full.\n");
                 rec_state = 0;
             }else{
-                sprintf(fname, "%sima_%05d_%08d.raw", folder, record_id, 
+                sprintf(fname, "%sima_%05d_%08d.raw", folder.c_str(), record_id, 
                     xim->acq_nframe);
                 FILE* fid = fopen(fname, "wb");
                 if (fid == NULL){
@@ -299,29 +299,31 @@ int main(int argc, char* argv[]) {
 	HandleResult(stat,"xiStartAcquisition");
 
     struct timeval tp1, tp2;
-
-    while (1){
-
-        if (getch() == 27){
-            rec_state ^= 1;
-        }
-
-        for (int n=0;n<2;n++){
-            mtx[n].lock();
-            stat = xiGetImage(xiH, 5000, &(img70mb[n]));
-            if (!rec_state){
-                printf("ACQ %d\n", img70mb[n].acq_nframe);
-                if (img70mb[n].acq_nframe - last_acq > 1){
-                    printf("Frame missed\n");
-                }
-                last_acq = img70mb[n].acq_nframe;
+    if (!graphical_target){
+        while (1){
+            int key = getch();
+            if (key == 27){
+                rec_state ^= 1;
+            }    
+            if (key == 'q'){
+                break;
             }
-            mtx[n].unlock();
-            usleep(1000);
+            for (int n=0;n<2;n++){
+                mtx[n].lock();
+                stat = xiGetImage(xiH, 5000, &(img70mb[n]));
+                if (!rec_state){
+                    printf("ACQ %d\n", img70mb[n].acq_nframe);
+                    if (img70mb[n].acq_nframe - last_acq > 1){
+                        printf("Frame missed\n");
+                    }
+                    last_acq = img70mb[n].acq_nframe;
+                }
+                mtx[n].unlock();
+                usleep(1000);
+            }
         }
     }
-
-    {
+    
         //
         //    if (graphical_target){
         //
@@ -405,7 +407,7 @@ int main(int argc, char* argv[]) {
         //        }
         //    }
         
-    }
+    
 
 
 finish:
