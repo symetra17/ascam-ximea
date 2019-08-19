@@ -237,6 +237,10 @@ void* save_disk_task(void* arg){
 
 
 int main(int argc, char* argv[]) {
+    //std::string folderxx = "/media/ins/red_ssd/my_image/";
+    //std::string folderxx = "/media/ins/red_ssd/";
+    //printf("%d\n",get_free_space_mb(folderxx));
+    //return 0;
 
     Mat mimage;
     mimage = Mat::zeros(6004, 7920, CV_8UC1);
@@ -258,7 +262,11 @@ int main(int argc, char* argv[]) {
     char str1[100];
     fgets(str1, 100, fid);
     fclose(fid);
-    sscanf(str1, "%d %d %f", &expos_t, &gain, &apert);      // 2855 12 6.2 
+    float fgain=0;
+    sscanf(str1, "%d %f %f", &expos_t, &fgain, &apert);      // 2855 12 6.2 
+    gain=int(fgain);
+    printf("expo %d gain %d apert %f\n", expos_t, gain, apert);
+
 
     for (int n=0; n<2; n++){
 	    memset(&(img70mb[n]), 0, sizeof(img70mb[n]));
@@ -324,9 +332,21 @@ int main(int argc, char* argv[]) {
         }
     }
     
-        //
-        //    if (graphical_target){
-        //
+    if (graphical_target){
+        int n=0;
+        while(1){
+            stat = xiGetImage(xiH, 5000, &(img70mb[0]));
+            cv::Mat mat(7920, 6004, CV_8U, img70mb[0].bp );
+            //img70mb[0].bp_size
+            cv::resize(mat, mat, cv::Size(1024, 600));
+            imshow("", mat);
+            int key = waitKey(10);
+            if (key == 'q'){
+                break;
+            }
+            printf("%d    %d\n",n++, img70mb[0].bp_size);
+        }
+    }
         //        cv::resize(mimage, smallimg, cv::Size(1024, 600));
         //        char str1[100];
         //        sprintf(str1, "%.2f ms", expos_t/1000.0);
@@ -405,7 +425,7 @@ int main(int argc, char* argv[]) {
         //            gain = 12;
         //            xiSetParamInt(xiH, XI_PRM_GAIN, gain);
         //        }
-        //    }
+    
         
     
 
